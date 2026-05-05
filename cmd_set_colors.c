@@ -54,23 +54,24 @@ typedef BOOL(WINAPI *SetConsoleScreenBufferInfoEx_t)(HANDLE ConsoleOutput, struc
 #endif
 
 /* The 16-color palette (DOS-style) */
+// Default to Dracula Classic (Dark) Color Theme/Scheme (as that's what I'm using at the moment)
 static uint32_t ColorTable[16] = {
-    myRGB(0, 0, 0),         /* 0: Black */
-    myRGB(0, 0, 128),       /* 1: Dark Blue */
-    myRGB(0, 128, 0),       /* 2: Dark Green */
-    myRGB(0, 128, 128),     /* 3: Dark Cyan */
-    myRGB(128, 0, 0),       /* 4: Dark Red */
-    myRGB(128, 0, 128),     /* 5: Dark Magenta */
-    myRGB(128, 128, 0),     /* 6: Dark Yellow */
-    myRGB(192, 192, 192),   /* 7: Dark White (Gray) */
-    myRGB(128, 128, 128),   /* 8: Bright Black (Gray) */
-    myRGB(0, 0, 255),       /* 9: Bright Blue */
-    myRGB(0, 255, 0),       /* 10: Bright Green */
-    myRGB(0, 255, 255),     /* 11: Bright Cyan */
-    myRGB(255, 0, 0),       /* 12: Bright Red */
-    myRGB(255, 0, 255),     /* 13: Bright Magenta */
-    myRGB(255, 255, 0),     /* 14: Bright Yellow */
-    myRGB(255, 255, 255)    /* 15: Bright White */
+    myRGB( 40,  42,  54),   /* 0: Black */
+    myRGB(189, 147, 249),   /* 1: Dark Blue */
+    myRGB( 80, 250, 123),   /* 2: Dark Green */
+    myRGB(139, 233, 253),   /* 3: Dark Cyan */
+    myRGB(255,  85,  85),   /* 4: Dark Red */
+    myRGB(255, 121, 198),   /* 5: Dark Magenta */
+    myRGB(241, 250, 140),   /* 6: Dark Yellow */
+    myRGB(248, 248, 242),   /* 7: Dark White (Gray) */
+    myRGB( 98, 114, 164),   /* 8: Bright Black (Gray) */
+    myRGB(214, 172, 255),   /* 9: Bright Blue */
+    myRGB(105, 255, 148),   /* 10: Bright Green */
+    myRGB(164, 255, 255),   /* 11: Bright Cyan */
+    myRGB(255, 110, 110),   /* 12: Bright Red */
+    myRGB(255, 146, 223),   /* 13: Bright Magenta */
+    myRGB(255, 255, 165),   /* 14: Bright Yellow */
+    myRGB(255, 255, 255),   /* 15: Bright White */
     // TODO handle FOREGROUND and BACKGROUND
 };
 

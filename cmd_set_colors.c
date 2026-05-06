@@ -280,7 +280,7 @@ void print_color_table(void) {
     }
 }
 
-int main(void)
+int main(int argc, char *argv[])
 {
     HMODULE kernel32;
     GetStdHandle_t pGetStdHandle;
@@ -291,6 +291,16 @@ int main(void)
     BOOL success;
     int i;
     int process_exit_code=0;
+    char *ini_filename="colors.ini";
+
+    if (argc > 1) {
+        if (strcmp(argv[1], "-h") == 0 || strcmp(argv[1], "--help") == 0) {
+            printf("Usage: %s [ini_filename]\n", argv[0]);
+            printf("Default ini_filename is \"colors.ini\"\n");
+            return 0;
+        }
+        ini_filename = argv[1];
+    }
 
     /* Load kernel32.dll and get function pointers */
     kernel32 = LoadLibraryA("kernel32.dll");
@@ -327,8 +337,6 @@ int main(void)
     }
 
 {
-    char *ini_filename="colors.ini";  // FIXME / TODO command line parameter rather than hard coded
-
     printf("Loading \"%s\"\n", ini_filename);
     process_exit_code = load_colors_from_ini(ini_filename);
     if (process_exit_code)

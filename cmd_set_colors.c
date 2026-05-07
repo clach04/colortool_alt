@@ -270,6 +270,40 @@ int main(int argc, char *argv[])
         return 1;
     }
 
+    /*******************/
+    /* Start of dump colors */
+
+    #ifndef ENABLE_VIRTUAL_TERMINAL_PROCESSING
+        #define ENABLE_VIRTUAL_TERMINAL_PROCESSING 0x0004
+    #endif
+
+    /*
+    ** Already got earlier
+
+    // 1. Get the handle to the standard output
+    HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
+    if (hOut == INVALID_HANDLE_VALUE) {
+        return GetLastError();
+    }
+    */
+
+    // Determing the current console mode
+    DWORD dwMode = 0;
+    if (!GetConsoleMode(hOut, &dwMode)) {
+        process_exit_code = GetLastError();
+        goto exit;
+    }
+
+    // Enable the virtual terminal processing flag -- https://learn.microsoft.com/en-us/windows/console/setconsolemode
+    dwMode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING;
+    if (!SetConsoleMode(hOut, dwMode)) {
+        // If this fails, the system likely doesn't support ANSI sequences
+        process_exit_code = GetLastError();
+        goto exit;
+    }
+
+    /*******************/
+
 exit:
 
     FreeLibrary(kernel32);

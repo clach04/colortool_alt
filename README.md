@@ -38,11 +38,11 @@ cmd_set_colors [ini_filename]
 
 ### Command-line Options
 
-| Option | Description |
-|--------|-------------|
-| `-h`, `--help` | Display usage information |
-| `--version` | Display version number |
-| `ini_filename` | Path to INI file with color definitions (default: `colors.ini`) |
+| Option           | Description                                                     |
+|------------------|-----------------------------------------------------------------|
+| `-h`, `--help`   | Display usage information                                       |
+| `--version`      | Display version number                                          |
+| `ini_filename`   | Path to INI file with color definitions (default: `colors.ini`) |
 
 ### Examples
 
@@ -94,24 +94,24 @@ BRIGHT_WHITE=255,255,255
 
 The tool supports the standard 16-color DOS palette:
 
-| Index | Name | Description |
-|-------|------|-------------|
-| 0 | DARK_BLACK | Black |
-| 1 | DARK_BLUE | Dark Blue |
-| 2 | DARK_GREEN | Dark Green |
-| 3 | DARK_CYAN | Dark Cyan |
-| 4 | DARK_RED | Dark Red |
-| 5 | DARK_MAGENTA | Dark Magenta |
-| 6 | DARK_YELLOW | Dark Yellow |
-| 7 | DARK_WHITE | Dark White (Gray) |
-| 8 | BRIGHT_BLACK | Bright Black (Gray) |
-| 9 | BRIGHT_BLUE | Bright Blue |
-| 10 | BRIGHT_GREEN | Bright Green |
-| 11 | BRIGHT_CYAN | Bright Cyan |
-| 12 | BRIGHT_RED | Bright Red |
-| 13 | BRIGHT_MAGENTA | Bright Magenta |
-| 14 | BRIGHT_YELLOW | Bright Yellow |
-| 15 | BRIGHT_WHITE | Bright White |
+| Index | Name           | Description                 |
+|-------|----------------|-----------------------------|
+| 0     | DARK_BLACK     | Black                       |
+| 1     | DARK_BLUE      | Dark Blue                   |
+| 2     | DARK_GREEN     | Dark Green                  |
+| 3     | DARK_CYAN      | Dark Cyan                   |
+| 4     | DARK_RED       | Dark Red                    |
+| 5     | DARK_MAGENTA   | Dark Magenta                |
+| 6     | DARK_YELLOW    | Dark Yellow                 |
+| 7     | DARK_WHITE     | Dark White (Gray)           |
+| 8     | BRIGHT_BLACK   | Bright Black (Gray)         |
+| 9     | BRIGHT_BLUE    | Bright Blue                 |
+| 10    | BRIGHT_GREEN   | Bright Green                |
+| 11    | BRIGHT_CYAN    | Bright Cyan                 |
+| 12    | BRIGHT_RED     | Bright Red                  |
+| 13    | BRIGHT_MAGENTA | Bright Magenta              |
+| 14    | BRIGHT_YELLOW  | Bright Yellow               |
+| 15    | BRIGHT_WHITE   | Bright White                |
 
 ## Current Status
 

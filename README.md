@@ -11,7 +11,7 @@ A Windows console color utility that sets CMD console colors using Windows API. 
 ## Features
 
 - Sets all 16 DOS-style console colors
-- Loads color definitions from INI files
+- Loads color definitions from INI files (compatible with ColorTool)
 - Default color scheme: Dracula Classic (Dark)
 - Command-line options for help and version info
 - Configurable color palette via external configuration
@@ -43,6 +43,8 @@ cmd_set_colors [ini_filename]
 | `-h`, `--help`   | Display usage information                                       |
 | `--version`      | Display version number                                          |
 | `ini_filename`   | Path to INI file with color definitions (default: `colors.ini`) |
+
+if ini file is missing, the colors in CMD will be updated to Dracula Classic (a dark theme).
 
 ### Examples
 

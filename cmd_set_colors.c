@@ -16,6 +16,9 @@
  *    * **partially working** ANSI color display - offset math wrong and looks ugly
  */
 
+/* Version macro */
+#define VERSION "0.0.2-dev"
+
 #include <stdio.h>
 #include <stdint.h>
 #include <string.h>
@@ -188,6 +191,10 @@ int main(int argc, char *argv[])
         if (strcmp(argv[1], "-h") == 0 || strcmp(argv[1], "--help") == 0) {
             printf("Usage: %s [ini_filename]\n", argv[0]);
             printf("Default ini_filename is \"colors.ini\"\n");
+            return 0;
+        }
+        if (strcmp(argv[1], "--version") == 0) {
+            printf("%s\n", VERSION);
             return 0;
         }
         ini_filename = argv[1];

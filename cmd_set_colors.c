@@ -3,8 +3,8 @@
  *
  * Compiles with:
  *
- *      gcc.exe cmd_set_colors.c -o cmd_set_colors
- *      cl cmd_set_colors.c
+ *      gcc ini.c cmd_set_colors.c -o cmd_set_colors
+ *      cl ini.c cmd_set_colors.c
  *
  * Run in CMD to apply colors
  *
@@ -112,7 +112,7 @@ static int load_ini_colors(const char *filename, uint32_t *table) {
     int found_colors[16] = {0};
     int colors_found = 0;
 
-    // Color name mappings (case-insensitive lookup via ini_get)
+    // Color name mappings (case-insensitive lookup via ini_get), in same order as IDX_DARK_BLACK (etc.) defines
     const char *color_names[] = {
         "DARK_BLACK", "DARK_BLUE", "DARK_GREEN", "DARK_CYAN",
         "DARK_RED", "DARK_MAGENTA", "DARK_YELLOW", "DARK_WHITE",

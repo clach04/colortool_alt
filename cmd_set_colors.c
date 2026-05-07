@@ -17,7 +17,7 @@
  */
 
 /* Version macro */
-#define VERSION "0.0.2"
+#define VERSION "0.0.3-dev"
 
 #include <stdio.h>
 #include <stdint.h>

@@ -12,8 +12,7 @@
  * Using; GetStdHandle(), GetConsoleScreenBufferInfoEx(), and SetConsoleScreenBufferInfoEx() from kernel32.dl1l
  * Current has:
  *    * hard coded colors
- *    * --**not working** ANSI color display TODO use SetConsoleMode() with ENABLE_VIRTUAL_TERMINAL_PROCESSING https://learn.microsoft.com/en-us/windows/console/setconsolemode--
- *    * **partially working** ANSI color display - offset math wrong and looks ugly
+ *    * ANSI color display using SetConsoleMode() with ENABLE_VIRTUAL_TERMINAL_PROCESSING
  */
 
 /* Version macro */
@@ -242,13 +241,95 @@ int main(int argc, char *argv[])
             printf("Error loading \"%s\"\n", ini_filename);
             printf("Result %d\n", process_exit_code);
 
-            //goto exit;
             // use built in default colors
-            printf("Using default built in colors");
+            printf("Using default built in colors\n");
         }
         process_exit_code = 0;
         print_color_table();
+        printf("\n");
     }
+
+    /* Enable ANSI color display - https://learn.microsoft.com/en-us/windows/console/setconsolemode */
+    #ifndef ENABLE_VIRTUAL_TERMINAL_PROCESSING
+        #define ENABLE_VIRTUAL_TERMINAL_PROCESSING 0x0004
+    #endif
+
+    DWORD dwMode = 0;
+    if (GetConsoleMode(hOut, &dwMode)) {
+        dwMode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING;
+        SetConsoleMode(hOut, dwMode);
+    }
+
+    /* Display ANSI color table TODO match https://github.com/clach04/terminal_style_toolkit/blob/main/pyshow_colors2.py style */
+    printf("\nANSI Color Table:\n");
+    printf("================\n\n");
+
+    /* Show color blocks */
+    printf("Color Blocks (Background colors):\n");
+    for (int bg = 40; bg <= 47; bg++) {
+        printf("\033[%dm   \033[0m ", bg);
+    }
+    printf("\n");
+    for (int bg = 40; bg <= 47; bg++) {
+        printf("\033[1;%dm   \033[0m ", bg);
+    }
+    printf("\n\n");
+
+    /* Show foreground color text examples */
+    printf("Foreground Colors:\n");
+    const char *demo_text = "Sample";
+    printf("\033[0mNormal:  ");
+    for (int fg = 30; fg <= 37; fg++) {
+        printf("\033[%dm%s\033[0m  ", fg, demo_text);
+    }
+    printf("\nBold:    ");
+    for (int fg = 30; fg <= 37; fg++) {
+        printf("\033[1;%dm%s\033[0m  ", fg, demo_text);
+    }
+    printf("\n\n");
+
+    /* Show color table grid (foreground x background) */
+    printf("Color Grid (Foreground x Background):\n");
+    const char *bg_names[] = {"black", "red", "green", "yellow", "blue", "magenta", "cyan", "white"};
+    const char *fg_names[] = {"black", "red", "green", "yellow", "blue", "magenta", "cyan", "white"};
+
+    /* Header row */
+    printf("        ");
+    for (int bg = 0; bg < 8; bg++) {
+        printf("%8s ", bg_names[bg]);
+    }
+    printf("\n");
+
+    /* Grid rows */
+    for (int fg = 0; fg < 8; fg++) {
+        printf("%8s ", fg_names[fg]);
+        for (int bg = 0; bg < 8; bg++) {
+            printf("\033[%d;%dm  XXXX  \033[0m ", 30+fg, 40+bg);
+        }
+        printf("\n");
+    }
+    printf("\n");
+
+    /* Show descriptive text example */
+    printf("Color Names Example:\n");
+    printf("\033[0;30mCOLOR_BLACK\033[0m        ");
+    printf("\033[0;31mCOLOR_RED\033[0m          ");
+    printf("\033[0;32mCOLOR_GREEN\033[0m        ");
+    printf("\033[0;33mCOLOR_YELLOW\033[0m       ");
+    printf("\033[0;34mCOLOR_BLUE\033[0m         ");
+    printf("\033[0;35mCOLOR_PURPLE\033[0m       ");
+    printf("\033[0;36mCOLOR_CYAN\033[0m         ");
+    printf("\033[0;37mCOLOR_WHITE\033[0m        ");
+    printf("\n");
+    printf("\033[1;30mCOLOR_GRAY\033[0m         ");
+    printf("\033[1;31mCOLOR_LIGHT_RED\033[0m    ");
+    printf("\033[1;32mCOLOR_LIGHT_GREEN\033[0m  ");
+    printf("\033[1;33mCOLOR_LIGHT_YELLOW\033[0m ");
+    printf("\033[1;34mCOLOR_LIGHT_BLUE\033[0m   ");
+    printf("\033[1;35mCOLOR_LIGHT_PURPLE\033[0m ");
+    printf("\033[1;36mCOLOR_LIGHT_CYAN\033[0m   ");
+    printf("\033[1;37mCOLOR_LIGHT_WHITE\033[0m\n");
+    printf("\n");
 
     // TODO Text/Forground, Background, and Cursor color using SetConsoleTextAttribute()
     // https://learn.microsoft.com/en-us/windows/console/console-screen-buffers
@@ -270,42 +351,6 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    /*******************/
-    /* Start of dump colors */
-
-    #ifndef ENABLE_VIRTUAL_TERMINAL_PROCESSING
-        #define ENABLE_VIRTUAL_TERMINAL_PROCESSING 0x0004
-    #endif
-
-    /*
-    ** Already got earlier
-
-    // 1. Get the handle to the standard output
-    HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
-    if (hOut == INVALID_HANDLE_VALUE) {
-        return GetLastError();
-    }
-    */
-
-    // Determing the current console mode
-    DWORD dwMode = 0;
-    if (!GetConsoleMode(hOut, &dwMode)) {
-        process_exit_code = GetLastError();
-        goto exit;
-    }
-
-    // Enable the virtual terminal processing flag -- https://learn.microsoft.com/en-us/windows/console/setconsolemode
-    dwMode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING;
-    if (!SetConsoleMode(hOut, dwMode)) {
-        // If this fails, the system likely doesn't support ANSI sequences
-        process_exit_code = GetLastError();
-        goto exit;
-    }
-
-    /*******************/
-
-exit:
-
     FreeLibrary(kernel32);
-    return process_exit_code;
+    return 0;
 }

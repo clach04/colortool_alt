@@ -18,7 +18,11 @@
 
 #include <stdio.h>
 #include <stdint.h>
+#include <string.h>
+#include <stdlib.h>
 #include <windows.h>
+
+#include "ini.h"
 
 /* RGB helper macro - converts to uint32 in BGR order for Windows */
 /* https://learn.microsoft.com/en-us/windows/win32/gdi/colorref */
@@ -95,159 +99,46 @@ static uint32_t ColorTable[16] = {
 #define IDX_BRIGHT_WHITE  15
 // TODO handle FOREGROUND and BACKGROUND
 
-/* Parse a line like "KEY = 206,204,192" and extract RGB values */
-static int parse_rgb_line(const char *line, uint8_t *r, uint8_t *g, uint8_t *b) {
-    char key[64];
-    int r_val, g_val, b_val;
-
-    //printf("parse_rgb_line entry\n");
-    /* Skip leading whitespace */
-    while (*line == ' ' || *line == '\t') line++;
-
-    /* Find the '=' sign */
-    const char *eq = strchr(line, '=');
-    if (!eq) return -1;
-
-    /* Extract key (everything before '='), trim trailing whitespace */
-    int key_len = (int)(eq - line);
-    while (key_len > 0 && (line[key_len-1] == ' ' || line[key_len-1] == '\t')) key_len--;
-    if (key_len >= (int)sizeof(key)) key_len = sizeof(key) - 1;
-    strncpy(key, line, key_len);
-    key[key_len] = '\0';
-
-    /* Move past '=' and skip whitespace */
-    line = eq + 1;
-    while (*line == ' ' || *line == '\t') line++;
-
-    /* Parse RGB values (comma-separated) */
-    // FIXME fragile, some spaces but not consistent...
-    if (sscanf(line, "%d, %d, %d", &r_val, &g_val, &b_val) != 3) {
-        if (sscanf(line, "%d,%d,%d", &r_val, &g_val, &b_val) != 3) {
-            //printf("sscanf() didn't find 3 numbers\n");
-            return -1;
-        }
-    }
-
-    *r = (uint8_t)r_val;
-    *g = (uint8_t)g_val;
-    *b = (uint8_t)b_val;
-
-    return 0;
-}
-
 /* Load colors from an INI file into the ColorTable */
+// Uses ini.c/ini.h functions for parsing
 // TODO handle FOREGROUND and BACKGROUND
 static int load_ini_colors(const char *filename, uint32_t *table) {
-    FILE *f = fopen(filename, "r");
-    if (!f) {
+    ini_t *ini = ini_load(filename);
+    if (!ini) {
         fprintf(stderr, "Warning: Could not open INI file: %s\n", filename);
         return -1;
     }
 
-    char line[256];
-    uint8_t r, g, b;
-    int found_colors[16] = {0};  // TODO handle FOREGROUND and BACKGROUND
+    int found_colors[16] = {0};
     int colors_found = 0;
-    static int in_table_section = 0;
 
-    while (fgets(line, sizeof(line), f)) {
-        /* Remove trailing newline/carriage return */
-        size_t len = strlen(line);
-        while (len > 0 && (line[len-1] == '\n' || line[len-1] == '\r')) {
-            line[--len] = '\0';
-        }
+    // Color name mappings (case-insensitive lookup via ini_get)
+    const char *color_names[] = {
+        "DARK_BLACK", "DARK_BLUE", "DARK_GREEN", "DARK_CYAN",
+        "DARK_RED", "DARK_MAGENTA", "DARK_YELLOW", "DARK_WHITE",
+        "BRIGHT_BLACK", "BRIGHT_BLUE", "BRIGHT_GREEN", "BRIGHT_CYAN",
+        "BRIGHT_RED", "BRIGHT_MAGENTA", "BRIGHT_YELLOW", "BRIGHT_WHITE"
+    };
 
-        /* Skip empty lines and comments */
-        if (len == 0 || line[0] == ';' || line[0] == '#') continue;
-
-        /* Check if we're in the [table] section */
-        if (line[0] == '[') {
-            if (strstr(line, "[table]") || strstr(line, "[TABLE]")) {
-                in_table_section = 1;
-            } else {
-                in_table_section = 0;
-            }
-            continue;
-        }
-
-        //printf("DEBUG line: >%s<\n", line);
-        //printf("DEBUG in_table_section: >%d<\n", in_table_section);
-        /* Only parse color entries in [table] section */
-        if (in_table_section) {
-            /* Try to parse as a color entry */
-            if (parse_rgb_line(line, &r, &g, &b) == 0) {  // this fails
-                //printf("DEBUG rgb: %03d, %03d, %03d\n", r, g, b);
-                /* Try to match common color names */
-                if (strstr(line, "DARK_BLACK") || strstr(line, "ANSI_BLACK")) {
-                    table[IDX_DARK_BLACK] = myRGB(r, g, b);
-                    found_colors[IDX_DARK_BLACK] = 1;
-                    colors_found++;
-                } else if (strstr(line, "BRIGHT_BLACK") || strstr(line, "ANSI_BLACK_BRIGHT")) {
-                    table[IDX_BRIGHT_BLACK] = myRGB(r, g, b);
-                    found_colors[IDX_BRIGHT_BLACK] = 1;
-                    colors_found++;
-                } else if (strstr(line, "DARK_RED") || strstr(line, "ANSI_RED")) {
-                    table[IDX_DARK_RED] = myRGB(r, g, b);
-                    found_colors[IDX_DARK_RED] = 1;
-                    colors_found++;
-                } else if (strstr(line, "BRIGHT_RED") || strstr(line, "ANSI_RED_BRIGHT")) {
-                    table[IDX_BRIGHT_RED] = myRGB(r, g, b);
-                    found_colors[IDX_BRIGHT_RED] = 1;
-                    colors_found++;
-                } else if (strstr(line, "DARK_GREEN") || strstr(line, "ANSI_GREEN")) {
-                    table[IDX_DARK_GREEN] = myRGB(r, g, b);
-                    found_colors[IDX_DARK_GREEN] = 1;
-                    colors_found++;
-                } else if (strstr(line, "BRIGHT_GREEN") || strstr(line, "ANSI_GREEN_BRIGHT")) {
-                    table[IDX_BRIGHT_GREEN] = myRGB(r, g, b);
-                    found_colors[IDX_BRIGHT_GREEN] = 1;
-                    colors_found++;
-                } else if (strstr(line, "DARK_YELLOW") || strstr(line, "ANSI_YELLOW")) {
-                    table[IDX_DARK_YELLOW] = myRGB(r, g, b);
-                    found_colors[IDX_DARK_YELLOW] = 1;
-                    colors_found++;
-                } else if (strstr(line, "BRIGHT_YELLOW") || strstr(line, "ANSI_YELLOW_BRIGHT")) {
-                    table[IDX_BRIGHT_YELLOW] = myRGB(r, g, b);
-                    found_colors[IDX_BRIGHT_YELLOW] = 1;
-                    colors_found++;
-                } else if (strstr(line, "DARK_BLUE") || strstr(line, "ANSI_BLUE")) {
-                    table[IDX_DARK_BLUE] = myRGB(r, g, b);
-                    found_colors[IDX_DARK_BLUE] = 1;
-                    colors_found++;
-                } else if (strstr(line, "BRIGHT_BLUE") || strstr(line, "ANSI_BLUE_BRIGHT")) {
-                    table[IDX_BRIGHT_BLUE] = myRGB(r, g, b);
-                    found_colors[IDX_BRIGHT_BLUE] = 1;
-                    colors_found++;
-                } else if (strstr(line, "DARK_MAGENTA") || strstr(line, "ANSI_MAGENTA")) {
-                    table[IDX_DARK_MAGENTA] = myRGB(r, g, b);
-                    found_colors[IDX_DARK_MAGENTA] = 1;
-                    colors_found++;
-                } else if (strstr(line, "BRIGHT_MAGENTA") || strstr(line, "ANSI_MAGENTA_BRIGHT")) {
-                    table[IDX_BRIGHT_MAGENTA] = myRGB(r, g, b);
-                    found_colors[IDX_BRIGHT_MAGENTA] = 1;
-                    colors_found++;
-                } else if (strstr(line, "DARK_CYAN") || strstr(line, "ANSI_CYAN")) {
-                    table[IDX_DARK_CYAN] = myRGB(r, g, b);
-                    found_colors[IDX_DARK_CYAN] = 1;
-                    colors_found++;
-                } else if (strstr(line, "BRIGHT_CYAN") || strstr(line, "ANSI_CYAN_BRIGHT")) {
-                    table[IDX_BRIGHT_CYAN] = myRGB(r, g, b);
-                    found_colors[IDX_BRIGHT_CYAN] = 1;
-                    colors_found++;
-                } else if (strstr(line, "DARK_WHITE") || strstr(line, "ANSI_WHITE")) {
-                    table[IDX_DARK_WHITE] = myRGB(r, g, b);
-                    found_colors[IDX_DARK_WHITE] = 1;
-                    colors_found++;
-                } else if (strstr(line, "BRIGHT_WHITE") || strstr(line, "ANSI_WHITE_BRIGHT")) {
-                    table[IDX_BRIGHT_WHITE] = myRGB(r, g, b);
-                    found_colors[IDX_BRIGHT_WHITE] = 1;
-                    colors_found++;
-                }
+    // Process each color entry in the [table] section
+    for (int i = 0; i < 16; i++) {
+        const char *val = ini_get(ini, "table", color_names[i]);
+        if (val) {
+            int r, g, b;
+            // Parse the RGB value (format: "R,G,B" or "R, G, B")
+            if (sscanf(val, "%d, %d, %d", &r, &g, &b) == 3) {
+                table[i] = myRGB(r, g, b);
+                found_colors[i] = 1;
+                colors_found++;
+            } else if (sscanf(val, "%d,%d,%d", &r, &g, &b) == 3) {
+                table[i] = myRGB(r, g, b);
+                found_colors[i] = 1;
+                colors_found++;
             }
         }
     }
 
-    fclose(f);
+    ini_free(ini);
 
     printf("colors_found: %d\n", colors_found);
 
@@ -336,21 +227,21 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-{
-    printf("Loading \"%s\"\n", ini_filename);
-    process_exit_code = load_colors_from_ini(ini_filename);
-    if (process_exit_code)
     {
-        printf("Error loading \"%s\"\n", ini_filename);
-        printf("Result %d\n", process_exit_code);
+        printf("Loading \"%s\"\n", ini_filename);
+        process_exit_code = load_colors_from_ini(ini_filename);
+        if (process_exit_code)
+        {
+            printf("Error loading \"%s\"\n", ini_filename);
+            printf("Result %d\n", process_exit_code);
 
-        //goto exit;
-        // use built in default colors
-        printf("Using default built in colors");
+            //goto exit;
+            // use built in default colors
+            printf("Using default built in colors");
+        }
+        process_exit_code = 0;
+        print_color_table();
     }
-    process_exit_code = 0;
-    print_color_table();
-}
 
     // TODO Text/Forground, Background, and Cursor color using SetConsoleTextAttribute()
     // https://learn.microsoft.com/en-us/windows/console/console-screen-buffers

@@ -24,7 +24,7 @@
 #include <stdlib.h>
 #include <windows.h>
 
-#include "ini.h"
+#include "ini.h"  // https://github.com/rxi/ini
 
 /* RGB helper macro - converts to uint32 in BGR order for Windows */
 /* https://learn.microsoft.com/en-us/windows/win32/gdi/colorref */

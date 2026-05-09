@@ -115,6 +115,13 @@ The tool supports the standard 16-color DOS palette:
 | 14    | BRIGHT_YELLOW  | Bright Yellow               |
 | 15    | BRIGHT_WHITE   | Bright White                |
 
+## API Resources
+
+  * https://learn.microsoft.com/en-us/windows/console/using-the-high-level-input-and-output-functions
+  * `CONSOLE_SCREEN_BUFFER_INFOEX` https://learn.microsoft.com/en-us/windows/console/console-screen-buffer-infoex
+  * `SetConsoleTextAttribute` https://learn.microsoft.com/en-us/windows/console/setconsoletextattribute
+  * Also see https doc links in `cmd_set_colors.c`
+
 ## Current Status
 
 ### Implemented
